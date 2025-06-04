@@ -61,8 +61,8 @@ nocrash_newweathertown_busy_cilv2 () {
 }
 
 function_array=(
-"nocrash_newweathertown_empty_cilv2"
-"nocrash_newweathertown_regular_cilv2"
+# "nocrash_newweathertown_empty_cilv2"
+# "nocrash_newweathertown_regular_cilv2"
 "nocrash_newweathertown_busy_cilv2")
 
 

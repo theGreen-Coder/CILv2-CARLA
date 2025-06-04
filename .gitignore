@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Ignore git config file to not leak personal info
+.gitconfig
+
 # Distribution / packaging
 .Python
 build/

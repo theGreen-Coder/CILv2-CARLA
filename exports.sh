@@ -1,0 +1,9 @@
+export ROOTDIR=
+export TRAINING_ROOT=
+export DRIVING_TEST_ROOT=
+export SCENARIO_RUNNER_ROOT=
+export CARLAPATH=
+export PYTHONPATH=
+export TRAINING_RESULTS_ROOT=
+export DATASET_PATH=
+export SENSOR_SAVE_PATH= # path to the directory where the driving test frames are stored
