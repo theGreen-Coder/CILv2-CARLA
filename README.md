@@ -39,12 +39,10 @@ Python version: 3.8
 
 Cuda version: 11.6
 
-Required packages: [requirements.txt](https://github.com/yixiao1/CILv2_multiview/blob/main/requirements.txt)
-
 * Set up the conda environment for the experiments:
 
-        conda create --name CILv2Env python=3.8
-        conda activate CILv2Env
+        conda env create -f environment.yml
+        conda activate CILv2Env2
 
 * Download [CARLA 0.9.13](https://github.com/carla-simulator/carla/releases/tag/0.9.13/) to your root directory and build up CARLA docker:
 
@@ -76,10 +74,6 @@ Required packages: [requirements.txt](https://github.com/yixiao1/CILv2_multiview
         export TRAINING_RESULTS_ROOT=<Path to the directory where the results to be saved>
         export DATASET_PATH=<Path to the directory where the datasets are stored>
         export SENSOR_SAVE_PATH=<Path to the directory where the driving test frames are stored>
-
-* Install the required packages:
-
-        conda install --file requirements.txt
 
 -------------------------------------------------------------
 ### Benchmark our trained CIL++

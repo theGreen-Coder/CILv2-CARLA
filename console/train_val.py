@@ -184,6 +184,5 @@ def execute(gpus_list, exp_batch, exp_name):
         print('')
 
     model.cuda()
-    model.train()
-    train_upstream_task(model, optimizer)
-
+    model.train()                           # PyTorch function to enables gradient modification
+    train_upstream_task(model, optimizer)   # Training loop function
