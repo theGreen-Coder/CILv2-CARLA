@@ -1,3 +1,5 @@
+This is a fork of [this repository.]([https://arxiv.org/abs/2302.03198](https://github.com/yixiao1/CILv2_multiview)). The only difference is that I will attempting to add an Adaptive Loss Function from [this paper](https://arxiv.org/abs/1701.03077). I will also try to document and maybe refactor some of the code. Finally, I will try to setup CIL++ training with Carla 0.10.0, for more photorealistic results.
+
 # CIL++ with Multi-View Attention Learning
 -------------------------------------------------------------
 
