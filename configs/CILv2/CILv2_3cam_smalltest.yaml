@@ -29,7 +29,7 @@ DATA_NORMALIZATION:
   speed: [-1.0, 11.0]     # m/s
 
 # Loss Parameters #
-LOSS: 'Action_nospeed_L1'  # no speed L1 loss
+LOSS: 'Adaptative_Robust_Loss'  # no speed L1 loss
 LOSS_WEIGHT:
   actions:
     steer: 0.50

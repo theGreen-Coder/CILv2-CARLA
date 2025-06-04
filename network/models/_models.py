@@ -18,7 +18,7 @@ class CILv2_multiview_attention(nn.Module):
         if g_conf.PROCESS_NAME == 'train_val':
             self._current_iteration = 0
             self._done_epoch = 0
-            self._criterion = Loss(g_conf.LOSS)
+            self._criterion = Loss(g_conf.LOSS, next(self._model.parameters()).device)
             self._train_loader, self._val_loaders= \
                 make_data_loader(self.name, os.environ["DATASET_PATH"], g_conf.TRAIN_DATASET_NAME, g_conf.BATCH_SIZE,
                                  g_conf.VALID_DATASET_NAME, g_conf.EVAL_BATCH_SIZE)
