@@ -130,15 +130,7 @@ def execute(gpus_list, exp_batch, exp_name):
         num_params += param.numel()
     print('model params: ', num_params)
 
-    # print("Debugging!")
-    # print(model.loss)
-    # print(model.loss.parameters())
-    # optimizer = torch.optim.AdamW(list(model.parameters()) + list(model.loss.parameters()), lr=g_conf.LEARNING_RATE)
-
-    print("HEELOOOOOOOO!!!!!!")
-    print(list(model._criterion.parameters()))
-    print("HEELOOOOOOOO!!!!!!") 
-    optimizer = torch.optim.AdamW(list(model.parameters()) + list(model._criterion.parameters()), lr=g_conf.LEARNING_RATE)
+    optimizer = torch.optim.AdamW(list(model.parameters()), lr=g_conf.LEARNING_RATE)
     if len(gpus_list) > 1 and g_conf.DATA_PARALLEL:
         print("Using multiple GPUs parallel! ")
         model = DataParallelWrapper(model)
