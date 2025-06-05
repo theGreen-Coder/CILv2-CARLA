@@ -181,7 +181,7 @@ def Loss(loss, device):
         return Action_nospeed_L1()
 
     elif loss=='Adaptative_Robust_Loss':
-        return Adaptative_Robust_Loss(num_dims = 2, float_dtype=np.float32, device=device)
+        return Adaptative_Robust_Loss(num_dims = 2, alpha_hi=4, float_dtype=np.float32, device=device)
 
     else:
         raise NotImplementError(" The loss of this model type has not yet defined ")

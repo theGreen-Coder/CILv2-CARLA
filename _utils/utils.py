@@ -85,6 +85,8 @@ def print_train_info(log_frequency, batch_size, model,
         else:
             print ("Training epoch {:.2f}, iteration {}, Loss {:.3f}, Steer Loss {:.3f}, Acc Loss {:.3f}, {:.2f} steps/s".format(
                 epoch, model._current_iteration, loss_data, steer_loss_data, acc_loss_data,(log_frequency / acc_time)))
+        print_alpha_scale(model)
+        print()
         acc_time = 0.0
 
     return acc_time
@@ -142,32 +144,62 @@ def draw_offline_evaluation_results(experiment_path, metrics_list, x_range=[0, 1
             plt.close()
 
 
-def write_model_results(experiment_path, model_name, results_dict, acc_as_action=False):
+import os
+
+def write_model_results(experiment_path: str, model_name: str, results_dict: dict, results_loss_dict: dict, acc_as_action: bool = False):
     for dataset_name, results in results_dict.items():
         results_file_csv = experiment_log_path(experiment_path, dataset_name)
-        new_row = ""
-        # first row if file doest exist
+        loss_dict = results_loss_dict
+
+        print("IMPORTANT!! PRINTING RESULTS!2")
+        print(loss_dict)
+        print()
+
+        alpha_keys  = sorted(k for k in loss_dict if k.startswith("Loss_Alpha"))
+        scale_keys  = sorted(k for k in loss_dict if k.startswith("Loss_Scale"))
+        loss_keys   = alpha_keys + scale_keys
+
         if not os.path.exists(results_file_csv):
-            new_row += "iteration, epoch, "
-            if acc_as_action:
-                new_row += "MAE_steer, MAE_acceleration, MAE"
-            else:
-                new_row += "MAE_steer, MAE_throttle, MAE_brake, MAE"
+            header = ["iteration", "epoch"]
 
-            new_row += "\n"
-        with open(results_file_csv, 'a') as f:
-            new_row += "{}, {:.2f}, ".format(results['iteration'], results['epoch'])
             if acc_as_action:
-                new_row += "{:.4f}, {:.4f}, {:.4f}".format(results[model_name]['MAE_steer'],
-                                                           results[model_name]['MAE_acceleration'],
-                                                           results[model_name]['MAE'])
+                header += ["MAE_steer", "MAE_acceleration", "MAE"]
             else:
-                new_row += "{:.4f}, {:.4f}, {:.4f}, {:.4f}".format(results[model_name]['MAE_steer'], results[model_name]['MAE_throttle'],
-                                                                   results[model_name]['MAE_brake'], results[model_name]['MAE'])
+                header += ["MAE_steer", "MAE_throttle", "MAE_brake", "MAE"]
 
-            new_row += "\n"
-            f.write(new_row)
-        print (" The results have been saved in: ", results_file_csv)
+            header += loss_keys
+            with open(results_file_csv, "a") as f:
+                f.write(", ".join(header) + "\n")
+
+        row = [
+            str(results["iteration"]),
+            f"{results['epoch']:.2f}"
+        ]
+
+        if acc_as_action:
+            mae_block = results[model_name]
+            row += [f"{mae_block['MAE_steer']:.4f}",
+                    f"{mae_block['MAE_acceleration']:.4f}",
+                    f"{mae_block['MAE']:.4f}"]
+        else:
+            mae_block = results[model_name]
+            row += [f"{mae_block['MAE_steer']:.4f}",
+                    f"{mae_block['MAE_throttle']:.4f}",
+                    f"{mae_block['MAE_brake']:.4f}",
+                    f"{mae_block['MAE']:.4f}"]
+
+        for k in loss_keys:
+            val = loss_dict.get(k, "")
+            if isinstance(val, float):
+                row.append(f"{val:.6f}")
+            else:
+                row.append(str(val))
+
+        with open(results_file_csv, "a") as f:
+            f.write(", ".join(row) + "\n")
+
+        print(f"Results saved to: {results_file_csv}")
+
 
 def eval_done(experiment_path, dataset_paths, epoch):
     results_files = glob.glob(os.path.join(experiment_path, '*.csv'))
@@ -240,4 +272,59 @@ def extract_other_inputs(data, other_inputs=[], ignore=[]):
 
 def extract_commands(data):
     return torch.stack(data, 1).float()
+
+def add_alpha_scale_results(model):
+    """
+    Collect per-element values produced by model._criterion.{alpha, scale}.
+
+    Returns
+    -------
+    dict
+        Keys look like:
+            "Loss_Alpha_0", "Loss_Alpha_1", ...
+            "Loss_Scale_0", "Loss_Scale_1", ...
+        Each maps to a Python float (or whatever the call returns if it
+        isn’t tensor-like).
+    """
+    results = {}
+
+    for name in ("alpha", "scale"):
+        if not hasattr(model._criterion, name):
+            continue
+
+        attr = getattr(model._criterion, name)
+        value = attr() if callable(attr) else attr
+
+        if torch.is_tensor(value):
+            scalars = value.detach().cpu().flatten().tolist()
+        elif isinstance(value, (list, tuple)):
+            scalars = list(value)
+        else:
+            scalars = [value]
+
+        base = f"Loss_{name.capitalize()}_"
+        for idx, scalar in enumerate(scalars):
+            results[f"{base}{idx}"] = scalar
+    print("IMPORTANT!! PRINTING RESULTS!")
+    print(results)
+    print()
+    return results
+
+def print_alpha_scale(model):
+    """
+    Function to check if we should be printing alpha and scale values.
+    This only happens when the loss function is adaptative.
+    Args:
+
+    Returns:
+    """
+    if hasattr(model._criterion, "alpha") and hasattr(model._criterion, "scale"):
+        alpha_attr = getattr(model._criterion, "alpha")
+        scale_attr = getattr(model._criterion, "scale")
+
+        if callable(alpha_attr) and callable(scale_attr):
+            alpha = alpha_attr()
+            scale = scale_attr()
+
+            print(f'Alpha: {alpha}, Scale: {scale}')
 

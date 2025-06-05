@@ -3,7 +3,7 @@ import torch
 from configs import g_conf, set_type_of_process, merge_with_yaml
 from network.models_console import Models
 from _utils.training_utils import seed_everything, DataParallelWrapper, check_saved_checkpoints_in_total
-from _utils.utils import write_model_results, draw_offline_evaluation_results, eval_done
+from _utils.utils import write_model_results, draw_offline_evaluation_results, eval_done, add_alpha_scale_results
 
 def val_task(model):
     """
@@ -14,8 +14,10 @@ def val_task(model):
     model.eval()
     results_dict = model._eval(model._current_iteration, model._done_epoch)
     if results_dict is not None:
+        # Check if an adaptative loss funtion is being used and log alpha and scale to the results file
+        results_loss_dict = add_alpha_scale_results(model)
         write_model_results(g_conf.EXP_SAVE_PATH, model.name,
-                            results_dict, acc_as_action=g_conf.ACCELERATION_AS_ACTION)
+                            results_dict, results_loss_dict, acc_as_action=g_conf.ACCELERATION_AS_ACTION)
         draw_offline_evaluation_results(g_conf.EXP_SAVE_PATH, metrics_list=g_conf.EVAL_DRAW_OFFLINE_RESULTS_GRAPHS,
                                                     x_range=g_conf.EVAL_SAVE_EPOCHES)
 

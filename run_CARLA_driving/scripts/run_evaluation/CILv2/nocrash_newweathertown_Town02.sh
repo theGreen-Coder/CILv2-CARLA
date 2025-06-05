@@ -53,7 +53,7 @@ nocrash_newweathertown_busy_cilv2 () {
     --checkpoint=${DRIVING_TEST_ROOT}/results/nocrash  \
     --agent-config=${TRAINING_RESULTS_ROOT}/_results/Ours/Town1_2/config45.json \
     --docker=carlasim/carla:0.9.13 \
-    --gpus=0 \
+    --gpus=9 \
     --fps=20 \
     --PedestriansSeed=0 \
     --trafficManagerSeed=0 \

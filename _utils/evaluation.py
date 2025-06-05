@@ -6,7 +6,7 @@ import os
 from contextlib import contextmanager
 
 from _utils.utils import extract_targets, extract_commands, \
-    write_model_results, is_result_better, extract_other_inputs, draw_offline_evaluation_results, eval_done
+    write_model_results, is_result_better, extract_other_inputs, draw_offline_evaluation_results, eval_done, add_alpha_scale_results
 from configs import g_conf
 from logger import _logger
 from dataloaders.transforms import inverse_normalize
@@ -191,8 +191,11 @@ def evaluation_saving(model, optimizers, early_stopping_flags, save_all_checkpoi
                 model.eval()
                 results_dict = model._eval(model._current_iteration, model._done_epoch)
                 if results_dict is not None:
+                    # Check if an adaptative loss funtion is being used and log alpha and scale to the results file
+                    print(f'Model Name: {model.name}')
+                    results_loss_dict = add_alpha_scale_results(model)
                     write_model_results(g_conf.EXP_SAVE_PATH, model.name,
-                                        results_dict, acc_as_action=g_conf.ACCELERATION_AS_ACTION)
+                                        results_dict, results_loss_dict, acc_as_action=g_conf.ACCELERATION_AS_ACTION)
                     draw_offline_evaluation_results(g_conf.EXP_SAVE_PATH, metrics_list=g_conf.EVAL_DRAW_OFFLINE_RESULTS_GRAPHS,
                                                     x_range=g_conf.EVAL_SAVE_EPOCHES)
                     is_better_flag, best_pred = save_model_if_better(results_dict, model, optimizers, save_all=save_all_checkpoints)
