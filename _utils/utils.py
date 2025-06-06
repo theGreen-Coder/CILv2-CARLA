@@ -151,10 +151,6 @@ def write_model_results(experiment_path: str, model_name: str, results_dict: dic
         results_file_csv = experiment_log_path(experiment_path, dataset_name)
         loss_dict = results_loss_dict
 
-        print("IMPORTANT!! PRINTING RESULTS!2")
-        print(loss_dict)
-        print()
-
         alpha_keys  = sorted(k for k in loss_dict if k.startswith("Loss_Alpha"))
         scale_keys  = sorted(k for k in loss_dict if k.startswith("Loss_Scale"))
         loss_keys   = alpha_keys + scale_keys
@@ -305,9 +301,6 @@ def add_alpha_scale_results(model):
         base = f"Loss_{name.capitalize()}_"
         for idx, scalar in enumerate(scalars):
             results[f"{base}{idx}"] = scalar
-    print("IMPORTANT!! PRINTING RESULTS!")
-    print(results)
-    print()
     return results
 
 def print_alpha_scale(model):

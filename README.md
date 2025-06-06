@@ -6,11 +6,11 @@ This is a fork of [this repository](https://github.com/yixiao1/CILv2_multiview).
  <img src="Driving.gif" height="250">
 
 ### Publications
-This is the official code release of the paper:
+This is **NOT** the official code release of the paper:
 
 Yi Xiao, Felipe Codevilla, Diego Porres and Antonio M. Lopez. [Scaling Vision-based End-to-End Driving with Multi-View Attention Learning](https://arxiv.org/abs/2302.03198).
 
-Please cite our paper if you find this work useful (will be soon updated with the IROS citation):
+Please cite the paper if you find this work useful:
 
          @misc{xiao2023scaling,
          title={Scaling Vision-based End-to-End Driving with Multi-View Attention Learning},

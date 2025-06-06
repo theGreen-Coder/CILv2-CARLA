@@ -58,11 +58,13 @@ def update_learning_rate(optimizer, minimumlr = 0.00001):
     minlr = minimumlr
     if g_conf.LEARNING_RATE_POLICY['name'] == 'normal':
         for param_group in optimizer.param_groups:
-            cur_lr = param_group['lr']
-            print('Previous lr:', cur_lr)
-            new_lr = cur_lr * g_conf.LEARNING_RATE_POLICY['level']
-            param_group['lr'] = max(new_lr, minlr)
-            print('New lr:', param_group['lr'])
+            if param_group["name"] is not "loss_params":
+                print(f"Modifying learning rate for {param_group['name']}")
+                cur_lr = param_group['lr']
+                print('Previous lr:', cur_lr)
+                new_lr = cur_lr * g_conf.LEARNING_RATE_POLICY['level']
+                param_group['lr'] = max(new_lr, minlr)
+                print('New lr:', param_group['lr'])
 
     else:
         raise NotImplementedError('Not found learning rate policy !')

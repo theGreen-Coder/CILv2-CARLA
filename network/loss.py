@@ -40,7 +40,7 @@ class Action_nospeed_L1(nn.Module):
             return loss, steer_loss, throttle_loss, brake_loss
 
 class Adaptative_Robust_Loss(nn.Module):
-    def __init__(self,num_dims,float_dtype,device,alpha_lo=0.001,alpha_hi=1.999,alpha_init=None,scale_lo=1e-5,scale_init=1.0):
+    def __init__(self, num_dims, float_dtype, device, alpha_lo=0.001, alpha_hi=1.999, alpha_init=None, scale_lo=1e-5, scale_init=1.0):
         super(Adaptative_Robust_Loss, self).__init__()
 
         if not np.isscalar(alpha_lo):
@@ -181,7 +181,7 @@ def Loss(loss, device):
         return Action_nospeed_L1()
 
     elif loss=='Adaptative_Robust_Loss':
-        return Adaptative_Robust_Loss(num_dims = 2, alpha_hi=4, float_dtype=np.float32, device=device)
+        return Adaptative_Robust_Loss(num_dims = 2, alpha_lo=0, alpha_hi=2, alpha_init=1, float_dtype=np.float32, device=device)
 
     else:
         raise NotImplementError(" The loss of this model type has not yet defined ")

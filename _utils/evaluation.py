@@ -192,7 +192,6 @@ def evaluation_saving(model, optimizers, early_stopping_flags, save_all_checkpoi
                 results_dict = model._eval(model._current_iteration, model._done_epoch)
                 if results_dict is not None:
                     # Check if an adaptative loss funtion is being used and log alpha and scale to the results file
-                    print(f'Model Name: {model.name}')
                     results_loss_dict = add_alpha_scale_results(model)
                     write_model_results(g_conf.EXP_SAVE_PATH, model.name,
                                         results_dict, results_loss_dict, acc_as_action=g_conf.ACCELERATION_AS_ACTION)
