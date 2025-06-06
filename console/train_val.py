@@ -130,7 +130,25 @@ def execute(gpus_list, exp_batch, exp_name):
         num_params += param.numel()
     print('model params: ', num_params)
 
-    optimizer = torch.optim.AdamW(list(model.parameters()), lr=g_conf.LEARNING_RATE)
+
+    loss_params = list(model.loss_params)
+    base_params   = [p for p in model.parameters()
+                    if id(p) not in {id(q) for q in loss_params}]
+
+    assert len(base_params) + len(loss_params) == sum(1 for _ in model.parameters()) # Some parameters are missing or duplicated
+
+    LOSS_LR  = g_conf.LOSS_LEARNING_RATE
+    BASE_LR  = g_conf.LEARNING_RATE
+
+    optimizer = torch.optim.AdamW(
+        [
+            {'params': base_params,  'lr': BASE_LR, "name": "network_params"},
+            {'params': loss_params,  'lr': LOSS_LR, "name": "loss_params"},
+        ],
+    )
+    
+    # optimizer = torch.optim.AdamW(list(model.parameters()), lr=g_conf.LEARNING_RATE) - previous way to define optimizer (I'm going to keep it here just in case)
+
     if len(gpus_list) > 1 and g_conf.DATA_PARALLEL:
         print("Using multiple GPUs parallel! ")
         model = DataParallelWrapper(model)

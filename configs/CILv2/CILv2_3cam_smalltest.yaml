@@ -43,6 +43,9 @@ LEARNING_RATE_POLICY:
   name: 'normal'
   level: 0.5
 
+# Loss Parameters
+LOSS_LEARNING_RATE: 0.0001
+
 #### Validation Related Parameters ####
 EVAL_SAVE_LAST_Conv_ACTIVATIONS: True
 EVAL_BATCH_SIZE: 30

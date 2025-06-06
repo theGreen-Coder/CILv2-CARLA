@@ -52,6 +52,9 @@ _g_conf.LEARNING_RATE_MINIMUM = 0.00001
 _g_conf.LEARNING_RATE_DECAY_EPOCHES = []    # we adjust learning rate for each 1000 iterations
 _g_conf.LEARNING_RATE_POLICY = {'name': 'normal', 'level': 0.5, 'momentum': 0, 'weight_decay': 0}   # lr multiply by 0.5 for each LEARNING_RATE_STEP
 
+"""#### Optimizer Related Parameters ####"""
+_g_conf.LOSS_LEARNING_RATE = 0.0001
+
 """#### Network Related Parameters ####"""
 _g_conf.MODEL_TYPE = ''
 _g_conf.MODEL_CONFIGURATION = {}

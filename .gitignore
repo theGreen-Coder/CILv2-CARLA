@@ -9,6 +9,9 @@ __pycache__/
 # Ignore the following file to not leak personal info
 .gitconfig
 
+# Ignore large compressed files
+*.gz
+
 # Distribution / packaging
 .Python
 build/
