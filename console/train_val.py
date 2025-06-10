@@ -1,11 +1,12 @@
 import os
 import torch
+import wandb
 import time
 import shutil
 from configs import g_conf, set_type_of_process, merge_with_yaml
 from network.models_console import Models
 from _utils.training_utils import seed_everything, DataParallelWrapper, check_saved_checkpoints, update_learning_rate
-from _utils.utils import extract_targets, extract_other_inputs, extract_commands, print_train_info, test_stop
+from _utils.utils import extract_targets, extract_other_inputs, extract_commands, print_train_info, return_alpha_scale_dict, test_stop
 from _utils.evaluation import evaluation_saving
 from logger import _logger
 
@@ -50,11 +51,11 @@ def train_upstream_task(model, optimizer):
             }
 
             if g_conf.ACCELERATION_AS_ACTION:
-                loss, steer_loss, acceleration_loss = model.loss(loss_params)
+                loss, steer_loss, acceleration_loss, diff = model.loss(loss_params)
                 acc_time = print_train_info(g_conf.TRAIN_PRINT_LOG_FREQUENCY, g_conf.BATCH_SIZE, model, time_start,
                                             acc_time, loss.item(), steer_loss.item(), acceleration_loss.item())
             else:
-                loss, steer_loss, throttle_loss, brake_loss = model.loss(loss_params)
+                loss, steer_loss, throttle_loss, brake_loss, diff = model.loss(loss_params)
                 acc_time = print_train_info(g_conf.TRAIN_PRINT_LOG_FREQUENCY, g_conf.BATCH_SIZE, model, time_start,
                                             acc_time, loss.item(), steer_loss.item(), throttle_loss.item(), brake_loss.item)
 
@@ -63,6 +64,25 @@ def train_upstream_task(model, optimizer):
             optimizer.step()
 
             time_start = time.time()
+            """
+            ################################################
+                Add Weights and Biases logs
+            #################################################
+            """
+
+            standard_log = {
+                "loss": loss.item(),
+                "loss_steer": steer_loss.item(),
+                "loss_acceleration": acceleration_loss.item(),
+                "current_iteration": model._current_iteration,
+                "steer_distribution": wandb.Histogram(diff[:,0].tolist()),
+                "acceleration_distribution": wandb.Histogram(diff[:,1].tolist()),
+            }
+            loss_params_log = return_alpha_scale_dict(model)
+            total_log = {**standard_log, **loss_params_log}
+
+            wandb.log(total_log, step=model._current_iteration)
+
             """
             ################################################
                 Adding tensorboard logs
@@ -125,11 +145,28 @@ def execute(gpus_list, exp_batch, exp_name):
     # print("")
     # print(model)
 
+    # Weights and Biases SetUp
+    wandb.login()
+
+    wandb.init(
+        project=os.environ["WANDB_PROJECT"],
+        config={
+            "epochs": g_conf.NUMBER_EPOCH,
+            "batch_size": g_conf.BATCH_SIZE,
+            "loss_name": g_conf.LOSS,
+            "network_learning_rate": g_conf.LEARNING_RATE,
+            "loss_learning_rate": g_conf.LOSS_LEARNING_RATE,
+            "train_dataset_name": str(g_conf.TRAIN_DATASET_NAME),
+            "validation_dataset_name": str(g_conf.VALID_DATASET_NAME),
+            "magical_seed": g_conf.MAGICAL_SEED,
+        },
+    )
+
+    # Set up learning rate for base parameters and loss_parameters
     num_params=0
     for param in model.parameters():
         num_params += param.numel()
     print('model params: ', num_params)
-
 
     loss_params = list(model.loss_params)
     base_params   = [p for p in model.parameters()

@@ -3,6 +3,7 @@ import torch.nn as nn
 from configs import g_conf
 import network.adaptative_robust_loss
 import numpy as np
+import wandb
 
 from network.adaptative_robust_loss import distribution
 from network.adaptative_robust_loss import util
@@ -15,8 +16,10 @@ class Action_nospeed_L1(nn.Module):
     def forward(self, params):
         B = params['action_output'].shape[0]  # batch_size
 
+        diff = params['action_output'][:,-1,:] - params['targets_action'][-1]
+
         # SingleFrame model - we only take into account the last frame's action
-        actions_loss_mat = torch.abs(params['action_output'][:,-1,:] - params['targets_action'][-1])  # (B, 2)
+        actions_loss_mat = torch.abs(diff)  # (B, 2)
 
         steer_loss = actions_loss_mat[:, 0] * params['variable_weights']['actions']['steer']
         steer_loss = torch.sum(steer_loss) / B
@@ -27,7 +30,7 @@ class Action_nospeed_L1(nn.Module):
 
             loss = steer_loss + acceleration_loss
 
-            return loss, steer_loss, acceleration_loss
+            return loss, steer_loss, acceleration_loss, diff
 
         else:
             throttle_loss = actions_loss_mat[:, 1] * params['variable_weights']['actions']['throttle']
@@ -37,11 +40,12 @@ class Action_nospeed_L1(nn.Module):
 
             loss = steer_loss + throttle_loss + brake_loss
 
-            return loss, steer_loss, throttle_loss, brake_loss
+            return loss, steer_loss, throttle_loss, brake_loss, diff
 
 class Adaptative_Robust_Loss(nn.Module):
     def __init__(self, num_dims, float_dtype, device, alpha_lo=0.001, alpha_hi=1.999, alpha_init=None, scale_lo=1e-5, scale_init=1.0):
         super(Adaptative_Robust_Loss, self).__init__()
+        self.diff = []
 
         if not np.isscalar(alpha_lo):
             raise ValueError('`alpha_lo` must be a scalar, but is of type {}'.format(type(alpha_lo)))
@@ -163,7 +167,7 @@ class Adaptative_Robust_Loss(nn.Module):
 
             loss = steer_loss + acceleration_loss
 
-            return loss, steer_loss, acceleration_loss
+            return loss, steer_loss, acceleration_loss, diff
 
         else:
             throttle_loss = actions_loss_mat[:, 1] * params['variable_weights']['actions']['throttle']
@@ -173,7 +177,7 @@ class Adaptative_Robust_Loss(nn.Module):
 
             loss = steer_loss + throttle_loss + brake_loss
 
-            return loss, steer_loss, throttle_loss, brake_loss
+            return loss, steer_loss, throttle_loss, brake_loss, diff
 
 def Loss(loss, device):
 
