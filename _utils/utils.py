@@ -321,3 +321,27 @@ def print_alpha_scale(model):
 
             print(f'Alpha: {alpha}, Scale: {scale}')
 
+def tensor_to_dict(tensor, prefix="Loss_Alpha"):
+    flat_tensor = tensor.flatten()
+    return {f"{prefix}{i}": float(val) for i, val in enumerate(flat_tensor)}
+
+def return_alpha_scale_dict(model):
+    """
+    Function to check if we should be printing alpha and scale values.
+    This only happens when the loss function is adaptative.
+    Args:
+
+    Returns: alpha and scale values
+    """
+    if hasattr(model._criterion, "alpha") and hasattr(model._criterion, "scale"):
+        alpha_attr = getattr(model._criterion, "alpha")
+        scale_attr = getattr(model._criterion, "scale")
+
+        if callable(alpha_attr) and callable(scale_attr):
+            alpha = alpha_attr()
+            scale = scale_attr()
+
+            return {**tensor_to_dict(alpha, prefix="Loss_Alpha"), **tensor_to_dict(scale, prefix="Loss_Scale")}
+    
+    return {}
+

@@ -12,6 +12,10 @@ __pycache__/
 # Ignore large compressed files
 *.gz
 
+# Ignore Weights and Biases and logs
+wandb/*
+console_logs/*
+
 # Distribution / packaging
 .Python
 build/
