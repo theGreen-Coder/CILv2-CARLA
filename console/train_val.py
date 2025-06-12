@@ -74,9 +74,10 @@ def train_upstream_task(model, optimizer):
                 "loss": loss.item(),
                 "loss_steer": steer_loss.item(),
                 "loss_acceleration": acceleration_loss.item(),
-                "current_iteration": model._current_iteration,
                 "steer_distribution": wandb.Histogram(diff[:,0].tolist()),
                 "acceleration_distribution": wandb.Histogram(diff[:,1].tolist()),
+                "current_iteration": model._current_iteration,
+                "model_epoch": model._done_epoch,
             }
             loss_params_log = return_alpha_scale_dict(model)
             total_log = {**standard_log, **loss_params_log}
