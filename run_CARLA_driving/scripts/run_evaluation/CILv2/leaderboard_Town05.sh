@@ -14,10 +14,10 @@ leaderboard_Town05_cilv2 () {
     --checkpoint=${DRIVING_TEST_ROOT}/results/leaderboard  \
     --agent-config=${TRAINING_RESULTS_ROOT}/_results/Ours/Town12346_5/config40.json \
     --docker=carlasim/carla:0.9.13 \
-    --gpus=0 \
+    --gpus=8 \
     --fps=20 \
-    --PedestriansSeed=0 \
-    --trafficManagerSeed=0 \
+    --PedestriansSeed=1 \
+    --trafficManagerSeed=1 \
     --save-driving-vision
 }
 

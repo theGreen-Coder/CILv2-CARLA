@@ -1,4 +1,5 @@
 import os
+from network.loss import trace_loss
 import torch
 import wandb
 import time
@@ -18,6 +19,7 @@ def train_upstream_task(model, optimizer):
     early_stopping_flags = []
     acc_time = 0.0
     time_start = time.time()
+    last_epoch = 0
 
     while True:
         # we get dataloader of the model
@@ -83,6 +85,29 @@ def train_upstream_task(model, optimizer):
             total_log = {**standard_log, **loss_params_log}
 
             wandb.log(total_log, step=model._current_iteration)
+            
+            # Plot loss function at each epoch
+            if last_epoch <= model._done_epoch:
+                last_epoch += 1
+
+                x, losses = trace_loss(model._criterion.lossfun, num_points=200)
+
+                # — pack into a W&B Table —
+                table_data = torch.stack([x, losses['steer'], losses['acceleration'], losses['total']], dim=1).cpu().detach().numpy()
+
+                wandb.log({
+                    f"loss_surface_{last_epoch}": wandb.plot.line_series(
+                        xs   = table_data[:, 0].tolist(),
+                        ys   = [
+                            table_data[:, 1].tolist(),  # steer_loss
+                            table_data[:, 2].tolist(),  # accel_loss
+                            table_data[:, 3].tolist()   # total_loss
+                        ],
+                        keys = ["steer_loss", "accel_loss", "total_loss"],
+                        title = f"Loss Surface @ epoch {last_epoch}",
+                    )
+                }, step=model._current_iteration)
+
 
             """
             ################################################

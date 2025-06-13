@@ -179,13 +179,31 @@ class Adaptative_Robust_Loss(nn.Module):
 
             return loss, steer_loss, throttle_loss, brake_loss, diff
 
+def trace_loss(lossfun, num_points=200):
+    device = lossfun.__self__.scale().device
+
+    x = torch.linspace(-2., 2., num_points, device=device)
+    diffs = torch.column_stack((x, x))  # shape (N, 2), on GPU
+
+    act_loss = lossfun(diffs)
+    steer_l = act_loss[:, 0] * 0.5
+    acc_l   = act_loss[:, 1] * 0.5
+    total_l = steer_l + acc_l
+
+    return x, {
+        'steer':       steer_l,
+        'acceleration': acc_l,
+        'total':        total_l
+    }
+
+
 def Loss(loss, device):
 
     if loss=='Action_nospeed_L1':
         return Action_nospeed_L1()
 
     elif loss=='Adaptative_Robust_Loss':
-        return Adaptative_Robust_Loss(num_dims = 2, alpha_lo=0, alpha_hi=2, alpha_init=1, float_dtype=np.float32, scale_lo=1, scale_init=1, device=device)
+        return Adaptative_Robust_Loss(num_dims = 2, alpha_lo=0, alpha_hi=2, alpha_init=1, float_dtype=np.float32, scale_lo=0.9999, scale_init=1, device=device)
 
     else:
-        raise NotImplementError(" The loss of this model type has not yet defined ")
+        raise NotImplementedError(" The loss of this model type has not yet defined ")
