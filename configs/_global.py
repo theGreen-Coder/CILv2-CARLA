@@ -54,6 +54,11 @@ _g_conf.LEARNING_RATE_POLICY = {'name': 'normal', 'level': 0.5, 'momentum': 0, '
 
 """#### Optimizer Related Parameters ####"""
 _g_conf.LOSS_LEARNING_RATE = 0.0001
+_g_conf.LOSS_ALPHA_LOW = 0.0
+_g_conf.LOSS_ALPHA_HIGH = 2.0
+_g_conf.LOSS_ALPHA_INIT = 1.0
+_g_conf.LOSS_SCALE_LOW = 0.5
+_g_conf.LOSS_SCALE_INIT = 1.0
 
 """#### Network Related Parameters ####"""
 _g_conf.MODEL_TYPE = ''
