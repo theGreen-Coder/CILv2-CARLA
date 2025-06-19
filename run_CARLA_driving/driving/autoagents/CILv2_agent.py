@@ -115,9 +115,9 @@ class CILv2_agent(object):
         print(self._model.name + '_' + str(checkpoint_number) + '.pth', "loaded from ",
               os.path.join(exp_dir, 'checkpoints'))
         if isinstance(self._model, torch.nn.DataParallel):
-            self._model.module.load_state_dict(self.checkpoint['model'])
+            self._model.module.load_state_dict(self.checkpoint['model'], strict=False)
         else:
-            self._model.load_state_dict(self.checkpoint['model'])
+            self._model.load_state_dict(self.checkpoint['model'], strict=False)
         self._model.cuda()
         self._model.eval()
 
